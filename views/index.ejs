@@ -1,0 +1,103 @@
+<div class="row">
+  <!-- Products -->
+  <div class="col-8">
+    <h3 class="mb-3">Available Products</h3>
+    <div class="row">
+      <% products.forEach(product => { %>
+        <div class="col-md-4">
+          <div class="product-card text-center p-2 border rounded shadow-sm">
+            <!-- Product Image -->
+            <% if (product.image) { %>
+              <img src="<%= product.image %>" alt="<%= product.name %>" 
+                   class="img-fluid mb-2" style="height:120px; object-fit:cover;">
+            <% } else { %>
+              <div class="bg-light mb-2" style="height:120px; display:flex; align-items:center; justify-content:center;">
+                <span class="text-muted">No Image</span>
+              </div>
+            <% } %>
+
+            <!-- Product Info -->
+            <h5><%= product.name %></h5>
+            <p class="text-muted">Rs.<%= product.price %></p>
+
+            <!-- Add to Cart Button -->
+            <button class="btn btn-secondary btn-sm"
+              onclick="addToCart('<%= product._id %>', '<%= product.name %>', <%= product.price %>)">
+              ➕ Add to Cart
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Cart -->
+  <div class="col-4">
+    <div class="cart-box p-3 border rounded shadow-sm">
+      <h4>🛍 Cart</h4>
+      <ul id="cartList" class="list-group mb-3"></ul>
+      <h5>Total: Rs.<span id="total">0</span></h5>
+      <form method="POST" action="/order" id="orderForm">
+        <input type="hidden" name="items" id="itemsInput">
+        <button type="submit" class="btn btn-success w-100 mt-2">🖨 Print Receipt</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cart = [];
+
+  // Add to Cart
+  function addToCart(id, name, price) {
+    let existing = cart.find(item => item.productId === id);
+    if (existing) {
+      existing.qty += 1; // agar product pehle se hai to qty increase
+    } else {
+      cart.push({ productId: id, name, price, qty: 1 });
+    }
+    renderCart();
+  }
+
+  // Render Cart
+  function renderCart() {
+    let list = document.getElementById("cartList");
+    list.innerHTML = "";
+    let total = 0;
+
+    cart.forEach((item, index) => {
+      total += item.price * item.qty;
+      list.innerHTML += `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${item.name}</strong><br>
+            Rs.${item.price} x ${item.qty} = Rs.${item.price * item.qty}
+          </div>
+          <div>
+            <button class="btn btn-sm btn-secondary" onclick="updateQty(${index}, -1)">➖</button>
+            <button class="btn btn-sm btn-secondary" onclick="updateQty(${index}, 1)">➕</button>
+            <button class="btn btn-sm btn-danger" onclick="removeItem(${index})">❌</button>
+          </div>
+        </li>
+      `;
+    });
+
+    document.getElementById("total").innerText = total;
+    document.getElementById("itemsInput").value = JSON.stringify(cart);
+  }
+
+  // Update Qty
+  function updateQty(index, change) {
+    cart[index].qty += change;
+    if (cart[index].qty <= 0) {
+      cart.splice(index, 1); // qty 0 ya negative ho to remove
+    }
+    renderCart();
+  }
+
+  // Remove Item
+  function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+  }
+</script>

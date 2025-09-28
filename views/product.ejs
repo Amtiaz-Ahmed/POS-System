@@ -1,0 +1,93 @@
+<div class="container mt-4">
+  <h2>Product Management</h2>
+
+  <!-- Add Product Form -->
+  <form action="/product/add" method="POST" enctype="multipart/form-data" class="mb-3">
+    <div class="row g-2">
+      <div class="col">
+        <input type="text" name="name" placeholder="Name" class="form-control" required>
+      </div>
+      <div class="col">
+        <input type="number" name="price" placeholder="Price" class="form-control" required>
+      </div>
+      <div class="col">
+        <select name="category" class="form-select" required>
+          <option value="">-- Select Category --</option>
+          <option value="Burger">Burger</option>
+          <option value="Pizza">Pizza</option>
+          <option value="Pasta">Pasta</option>
+          <option value="Fries">Fries</option>
+          <option value="Broast">Broast</option>
+          <option value="Tikka">Tikka</option>
+          <option value="Sandwich">Sandwich</option>
+          <option value="Wraps">Wraps</option>
+          <option value="Nuggets">Nuggets</option>
+          <option value="Drinks">Drinks</option>
+        </select>
+      </div>
+      <div class="col">
+        <input type="file" name="image" class="form-control" accept="image/*" required>
+      </div>
+      <div class="col">
+        <button type="submit" class="btn btn-success w-100">Add</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Product List Table -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th width="220px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% products.forEach(product => { %>
+            <tr>
+              <form action="/product/update/<%= product._id %>" method="POST" enctype="multipart/form-data">
+                <td>
+                  <% if (product.image) { %>
+                    <img src="<%= product.image %>" alt="Product Image" width="60" height="60" class="rounded">
+                  <% } else { %>
+                    <span>No Image</span>
+                  <% } %>
+                  <input type="file" name="image" class="form-control mt-2" accept="image/*">
+                </td>
+                <td>
+                  <input type="text" name="name" value="<%= product.name %>" class="form-control">
+                </td>
+                <td>
+                  <input type="number" name="price" value="<%= product.price %>" class="form-control">
+                </td>
+                <td>
+                  <select name="category" class="form-select">
+                    <option value="Burger" <%= product.category === "Burger" ? "selected" : "" %>>Burger</option>
+                    <option value="Pizza" <%= product.category === "Pizza" ? "selected" : "" %>>Pizza</option>
+                    <option value="Pasta" <%= product.category === "Pasta" ? "selected" : "" %>>Pasta</option>
+                    <option value="Fries" <%= product.category === "Fries" ? "selected" : "" %>>Fries</option>
+                    <option value="Broast" <%= product.category === "Broast" ? "selected" : "" %>>Broast</option>
+                    <option value="Tikka" <%= product.category === "Tikka" ? "selected" : "" %>>Tikka</option>
+                    <option value="Sandwich" <%= product.category === "Sandwich" ? "selected" : "" %>>Sandwich</option>
+                    <option value="Wraps" <%= product.category === "Wraps" ? "selected" : "" %>>Wraps</option>
+                    <option value="Nuggets" <%= product.category === "Nuggets" ? "selected" : "" %>>Nuggets</option>
+                    <option value="Drinks" <%= product.category === "Drinks" ? "selected" : "" %>>Drinks</option>
+                  </select>
+                </td>
+                <td>
+                  <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                  <a href="/products/delete/<%= product._id %>" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+              </form>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <h2>📋 Pending Orders</h2>
+
+  <% if (orders.length === 0) { %>
+    <div class="alert alert-success">🎉 No pending orders!</div>
+  <% } else { %>
+    <div class="card shadow-sm mt-3">
+      <div class="card-body">
+        <table class="table table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Order ID</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+              <tr>
+                <td><%= order._id %></td>
+                <td>
+                  <ul>
+                    <% order.items.forEach(i => { %>
+                      <li><%= i.name %> (x<%= i.qty %>) - Rs.<%= i.price * i.qty %></li>
+                    <% }) %>
+                  </ul>
+                </td>
+                <td>Rs.<%= order.totalAmount %></td>
+                <td><%= order.createdAt.toLocaleString() %></td>
+                <td>
+                  <form action="/order/update/<%= order._id %>" method="POST">
+                    <input type="hidden" name="status" value="delivered">
+                    <button type="submit" class="btn btn-sm btn-success">Mark as Delivered ✅</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>
