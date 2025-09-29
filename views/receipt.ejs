@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 300px;
+      margin: auto;
+      background: #fff;
+      color: #000;
+    }
+    .receipt {
+      border: 1px dashed #333;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+      margin: 0 0 10px 0;
+    }
+    p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 6px;
+      border-bottom: 1px dashed #aaa;
+    }
+    th {
+      text-align: left;
+    }
+    td.center {
+      text-align: center;
+    }
+    .total {
+      font-weight: bold;
+      text-align: right;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+    .center {
+      text-align: center;
+    }
+    .footer {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <h2>🧾 Receipt</h2>
+    <p><b>Date:</b> <%= order.createdAt.toLocaleString() %></p>
+    <p><b>Order No:</b> <%= order.orderNumber %></p>
+    <hr>
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="center">Qty</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.items.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td class="center"><%= item.qty %></td>
+            <td>Rs.<%= item.price * item.qty %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <p class="total">Total: Rs.<%= order.totalAmount %></p>
+    <hr>
+    <p class="footer">🙏 Thank you, Visit Again!</p>
+  </div>
+
+  <script>
+    // ✅ Auto print receipt
+    window.onload = function () {
+      window.print();
+    };
+  </script>
+</body>
+</html>

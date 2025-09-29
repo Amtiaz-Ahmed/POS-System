@@ -1,58 +1,65 @@
+// routes/index.js
 const express = require("express");
-const router = express.Router();
 const Product = require("../models/productModel");
 const Order = require("../models/orderModel");
+const Counter = require("../models/counterModel");
 
-// POS screen
-router.get("/", async (req, res) => {
-  const products = await Product.find();
-  res.render("index", { products });
+const router = express.Router();
+
+// POS screen (Products list)
+router.get("/", async (req, res, next) => {
+  try {
+    const products = await Product.find();
+    res.render("index", { products });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Create order
-router.post("/order", async (req, res) => {
-  let { items } = req.body;
+router.post("/order", async (req, res, next) => {
+  try {
+    let { items } = req.body;
+    if (!items) return res.status(400).send("Items data is missing");
+    if (typeof items === "string") items = JSON.parse(items);
+    if (!Array.isArray(items) || items.length === 0)
+      return res.status(400).send("Items must be a non-empty array");
 
-  // Agar empty ya undefined hai
-  if (!items || items.trim() === "") {
-    return res.status(400).send("Items data is missing");
+    const totalAmount = items.reduce((acc, i) => acc + i.price * i.qty, 0);
+const todayKey = new Date().toISOString().slice(0, 10);
+
+// Atomic daily counter
+let counter = await Counter.findOne({ date: todayKey });
+if (!counter) {
+  // Start from max existing orderNumber today
+  const maxOrder = await Order.findOne({
+    createdAt: {
+      $gte: new Date(todayKey + "T00:00:00.000Z"),
+      $lte: new Date(todayKey + "T23:59:59.999Z"),
+    },
+  }).sort({ orderNumber: -1 });
+
+  const startSeq = maxOrder ? maxOrder.orderNumber : 0;
+
+  counter = await Counter.create({ date: todayKey, seq: startSeq });
+}
+
+// Increment atomically
+counter = await Counter.findOneAndUpdate(
+  { date: todayKey },
+  { $inc: { seq: 1 } },
+  { new: true }
+);
+
+const orderNumber = counter.seq;
+
+    const order = new Order({ items, totalAmount, orderNumber });
+    await order.save();
+    res.redirect(`/receipt/${order._id}`);
+  } catch (err) {
+    console.error("❌ Order creation failed:", err);
+    next(err);
   }
-
-  // Agar string hai to parse karo
-  if (typeof items === "string") {
-    try {
-      items = JSON.parse(items);
-    } catch (err) {
-      console.error("Invalid JSON:", err);
-      return res.status(400).send("Invalid items data");
-    }
-  }
-
-  // Ab items pakka array hai
-const startOfDay = new Date();
-startOfDay.setHours(0, 0, 0, 0);
-const endOfDay = new Date();
-endOfDay.setHours(23, 59, 59, 999);
-
-// Count today's orders
-const countToday = await Order.countDocuments({
-  createdAt: { $gte: startOfDay, $lte: endOfDay }
-});
-const totalAmount = items.reduce((acc, i) => acc + i.price * i.qty, 0);
-
-
-// Order number = count + 1
-const orderNumber = countToday + 1;
-
-const order = new Order({
-  items,
-  totalAmount,
-  orderNumber // ✅ new field
 });
 
-await order.save();
-res.redirect(`/receipt/${order._id}`);
-});
-
-
-module.exports = router;
+module.exports = router; // ✅ CommonJS export

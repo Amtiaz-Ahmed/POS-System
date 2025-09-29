@@ -5,13 +5,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// var usersRouter = require('./routes/users');
 const connectDB = require("./config/database");
 var productsRouter = require('./routes/product');
-var reportsRouter = require('./routes/reports');
+var reportsRouter = require('./routes/report');
 var ordersRouter = require('./routes/order');
 const receiptRoutes = require("./routes/receipt"); 
 const expressLayouts = require("express-ejs-layouts");
+
 
 
 // DB connect
@@ -33,7 +34,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// app.use('/users', usersRouter);
 app.use('/product', productsRouter);
 app.use('/reports', reportsRouter);
 app.use("/", receiptRoutes);
@@ -55,4 +56,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
+
+// module.exports = app;

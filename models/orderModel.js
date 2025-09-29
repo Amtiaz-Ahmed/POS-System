@@ -3,17 +3,18 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema({
   items: [
     {
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-      name: String,
-      qty: Number,
-      price: Number,
-      image: { type: String } // 👈 Store image of product at time of order
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+      name: { type: String, required: true },
+      qty: { type: Number, required: true, min: 1 },
+      price: { type: Number, required: true, min: 0 },
+      image: { type: String }
     }
   ],
-   orderNumber: Number,
-  totalAmount: Number,
-  status: { type: String, default: "pending" },
-  createdAt: { type: Date, default: Date.now }
+  orderNumber: { type: Number, required: true },
+  totalAmount: { type: Number, required: true, min: 0 },
+  status: { type: String, enum: ["pending", "delivered", "cancelled"], default: "pending" },
+}, {
+  timestamps: true // createdAt & updatedAt auto
 });
 
 module.exports = mongoose.model("Order", orderSchema);
