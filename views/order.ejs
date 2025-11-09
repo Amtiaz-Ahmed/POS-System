@@ -1,0 +1,58 @@
+<div class="container mt-4">
+  <h2>📋 Pending Orders</h2>
+
+  <% if (orders.length === 0) { %>
+    <div class="alert alert-success text-center py-4 fs-5">
+      🎉 No pending orders!  
+    </div>
+  <% } else { %>
+    <div class="card shadow-sm mt-3">
+      <div class="card-body">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Order ID</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+              <tr>
+                <td><strong><%= order.orderNumber %></strong></td>
+                <td><code><%= order._id %></code></td>
+                <td>
+                  <ul class="mb-0">
+                    <% order.items.forEach(i => { %>
+                      <li>
+                        <%= i.name %> (x<%= i.qty %>) - 
+                        Rs.<%= (i.price * i.qty).toLocaleString("en-PK") %>
+                      </li>
+                    <% }) %>
+                  </ul>
+                </td>
+                <td><strong>Rs.<%= order.totalAmount.toLocaleString("en-PK") %></strong></td>
+                <td><%= order.createdAt.toLocaleString() %></td>
+                <td>
+                  <span class="badge bg-warning text-dark"><%= order.status %></span>
+                </td>
+                <td>
+                  <form action="/order/update/<%= order._id %>" method="POST" class="d-inline">
+                    <input type="hidden" name="status" value="delivered">
+                    <button type="submit" class="btn btn-sm btn-success">
+                      ✅ Mark Delivered
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</div>

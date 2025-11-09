@@ -1,0 +1,50 @@
+<h2>📊 Sales Report</h2>
+
+<!-- Date Filter Form -->
+<form method="GET" action="/reports" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <label>Start Date</label>
+    <input type="date" name="start" class="form-control" required value="<%= start || '' %>">
+  </div>
+  <div class="col-md-4">
+    <label>End Date (optional)</label>
+    <input type="date" name="end" class="form-control" value="<%= end || '' %>">
+  </div>
+  <div class="col-md-4 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+  </div>
+</form>
+
+<% if (orders && orders.length > 0) { %>
+  <!-- Summary -->
+  <div class="alert alert-info">
+    <h5>Total Orders: <%= orders.length %></h5>
+    <h5>Total Earning: Rs.<%= totalEarning %></h5>
+  </div>
+
+  <!-- Orders Table -->
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Date</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(order => { %>
+        <tr>
+          <td><%= order._id %></td>
+          <td><%= order.createdAt.toDateString() %></td>
+          <td>Rs.<%= order.totalAmount %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <!-- Excel Export -->
+  <a href="/reports/download?start=<%= start %>&end=<%= end %>" 
+     class="btn btn-success">⬇ Download Excel</a>
+<% } else { %>
+  <div class="alert alert-warning">No orders found for selected dates.</div>
+<% } %>

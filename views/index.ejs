@@ -1,0 +1,123 @@
+<div class="row">
+  <!-- Products -->
+  <div class="col-8">
+    <h3 class="mb-3">Available Products</h3>
+    <div class="row">
+      <% products.forEach(product => { %>
+        <div class="col-md-4 mb-3">
+          <div class="product-card text-center p-2 border rounded shadow-sm h-100">
+            <!-- Product Image -->
+            <% if (product.image) { %>
+              <img src="<%= product.image %>" alt="<%= product.name %>" 
+                   class="img-fluid mb-2" style="height:120px; object-fit:cover;">
+            <% } else { %>
+              <div class="bg-light mb-2 d-flex align-items-center justify-content-center" style="height:120px;">
+                <span class="text-muted">No Image</span>
+              </div>
+            <% } %>
+
+            <!-- Product Info -->
+            <h6 class="fw-bold"><%= product.name %></h6>
+            <p class="text-muted">Rs.<%= product.price.toLocaleString("en-PK") %></p>
+
+            <!-- Add to Cart Button -->
+            <button class="btn btn-sm btn-outline-primary"
+              onclick="addToCart('<%= product._id %>', '<%= product.name %>', <%= product.price %>)">
+              ➕ Add to Cart
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Cart -->
+  <div class="col-4">
+    <div class="cart-box p-3 border rounded shadow-sm">
+      <h4>🛍 Cart (<span id="cartCount">0</span>)</h4>
+      <ul id="cartList" class="list-group mb-3"></ul>
+
+      <h5>Total: Rs.<span id="total">0</span></h5>
+
+      <form method="POST" action="/order" id="orderForm" onsubmit="return validateCart()">
+        <input type="hidden" name="items" id="itemsInput">
+        <button type="submit" class="btn btn-success w-100 mt-2" id="printBtn" disabled>
+          🖨 Print Receipt
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cart = [];
+
+  // Add to Cart
+  function addToCart(id, name, price) {
+    let existing = cart.find(item => item.productId === id);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({ productId: id, name, price, qty: 1 });
+    }
+    renderCart();
+  }
+
+  // Render Cart
+  function renderCart() {
+    let list = document.getElementById("cartList");
+    list.innerHTML = "";
+    let total = 0;
+
+    cart.forEach((item, index) => {
+      total += item.price * item.qty;
+      list.innerHTML += `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${item.name}</strong><br>
+            Rs.${item.price.toLocaleString("en-PK")} x ${item.qty} 
+            = Rs.${(item.price * item.qty).toLocaleString("en-PK")}
+          </div>
+          <div>
+            <button class="btn btn-sm btn-outline-secondary" onclick="updateQty(${index}, -1)">➖</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="updateQty(${index}, 1)">➕</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})">❌</button>
+          </div>
+        </li>
+      `;
+    });
+
+    document.getElementById("total").innerText = total.toLocaleString("en-PK");
+    document.getElementById("itemsInput").value = JSON.stringify(cart);
+    document.getElementById("cartCount").innerText = cart.length;
+    document.getElementById("printBtn").disabled = cart.length === 0;
+
+    if (cart.length === 0) {
+      list.innerHTML = `<li class="list-group-item text-center text-muted">🛒 Your cart is empty</li>`;
+    }
+  }
+
+  // Update Qty
+  function updateQty(index, change) {
+    cart[index].qty += change;
+    if (cart[index].qty <= 0) {
+      cart.splice(index, 1);
+    }
+    renderCart();
+  }
+
+  // Remove Item
+  function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+  }
+
+  // Prevent empty cart submit
+  function validateCart() {
+    if (cart.length === 0) {
+      alert("Cart is empty!");
+      return false;
+    }
+    return true;
+  }
+</script>
